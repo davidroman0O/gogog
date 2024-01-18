@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
@@ -15,13 +16,13 @@ import (
 func getPath() (appDataPath string) {
 	switch runtime.GOOS {
 	case "windows":
-		appDataPath = os.Getenv("APPDATA")
+		appDataPath = os.Getenv("APPDATA") + "/gogog"
 	case "darwin": // macOS
 		home, _ := os.UserHomeDir()
-		appDataPath = home + "/Library/Application Support"
+		appDataPath = home + "/Library/Application Support" + "/gogog"
 	default: // Assume Linux/Unix
 		home, _ := os.UserHomeDir()
-		appDataPath = home + "/.local/share"
+		appDataPath = home + "/.local/share" + "/gogog"
 	}
 	return appDataPath
 }
@@ -85,6 +86,12 @@ func writeFile(filePath string, data []byte) error {
 		// return os.ErrExist
 	} else if !os.IsNotExist(err) {
 		// Some other error occurred while checking the file
+		return err
+	}
+
+	// Create directories recursively if they don't exist
+	dir := filepath.Dir(filePath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
 

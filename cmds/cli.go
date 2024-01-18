@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+/// GoGog CLI immersive environment which helps to manage the backups from the agent
+
 func Cmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "gogog",
