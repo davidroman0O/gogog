@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -20,6 +21,10 @@ func Cmd() *cobra.Command {
 		Short: "Allowing you to log into your account",
 		Long:  `It will opens a browser, you will have to login and it will find the cookies then quit`,
 		Run: func(cmd *cobra.Command, args []string) {
+			if data.HasState[types.GogAuth]() {
+				fmt.Println("You already have your authentication information")
+				return
+			}
 
 			log.Println("Please login then close the window")
 
@@ -88,7 +93,7 @@ func Cmd() *cobra.Command {
 					continue
 				}
 
-				ok, err := data.CheckCookies(gogClient.Client, types.Hostname)
+				user, ok, err := data.FetchUser(gogClient.Client, types.Hostname)
 				if err != nil {
 					log.Println("failed check cookies", err)
 					time.Sleep(1 * time.Second)
@@ -103,6 +108,7 @@ func Cmd() *cobra.Command {
 
 				auth := types.GogAuth{
 					Cookies: obj,
+					User:    user,
 				}
 
 				// when already exists, it failed

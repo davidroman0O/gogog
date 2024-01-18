@@ -10,6 +10,7 @@ type Gogog struct{}
 
 type GogAuth struct {
 	Cookies []*Cookie
+	User    *UserData
 }
 
 type GogStates interface {

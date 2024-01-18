@@ -51,23 +51,23 @@ func SetCookies(client *http.Client, cks []*types.Cookie, siteUrl string) error 
 	return nil
 }
 
-func CheckCookies(client *http.Client, siteUrl string) (bool, error) {
+func FetchUser(client *http.Client, siteUrl string) (*types.UserData, bool, error) {
 	req, err := client.Get(siteUrl + "/userData.json")
 	if err != nil {
-		return false, err
+		return nil, false, err
 	}
 	defer req.Body.Close()
 	if req.StatusCode != http.StatusOK {
-		return false, errors.New(req.Status)
+		return nil, false, errors.New(req.Status)
 	}
 	var obj types.UserData
 	err = json.NewDecoder(req.Body).Decode(&obj)
 	if err != nil {
-		return false, err
+		return nil, false, err
 	}
 	ok := obj.IsLoggedIn
 	if ok {
 		fmt.Println("Signed in as " + obj.Username + ".\n")
 	}
-	return ok, nil
+	return &obj, ok, nil
 }

@@ -98,3 +98,13 @@ func writeFile(filePath string, data []byte) error {
 	// Write data to file (create if not exists)
 	return os.WriteFile(filePath, data, 0644) // 0644 permissions
 }
+
+func Delete[T types.GogStates]() error {
+	filePath := getDataPath[T]()
+	err := os.Remove(filePath)
+	if err != nil {
+		log.Fatalf("Failed to delete file: %v", err)
+		return err
+	}
+	return nil
+}

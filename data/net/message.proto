@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package datanet;
+
+import "google/protobuf/empty.proto";
+
+// Add the go_package option here. Replace the path with your module's import path.
+option go_package = "github.com/davidroman0O/gogog/data/datanet";
+
+// The greeting service definition.
+service Agent {
+  
+  // Send authentication information to the agent
+  rpc SetAuth (UserData) returns (google.protobuf.Empty);
+}
+
+message Cookie {
+    string domain = 1;
+    double expirationDate = 2; // float64 in Go is double in protobuf
+    bool hostOnly = 3;
+    bool httpOnly = 4;
+    string name = 5;
+    string path = 6;
+    string sameSite = 7;
+    bool secure = 8;
+    bool session = 9;
+    string storeId = 10;
+    string value = 11;
+    int32 id = 12; // assuming ID is within int32 range
+}
+
+message UserData {
+    string country = 1;
+    repeated Currency currencies = 2; // Arrays are 'repeated' fields in protobuf
+    Currency selectedCurrency = 3;
+    Language preferredLanguage = 4;
+    string ratingBrand = 5;
+    bool isLoggedIn = 6;
+    UserChecksum checksum = 7;
+    UserUpdates updates = 8;
+    string userId = 9;
+    string username = 10;
+    string galaxyUserId = 11;
+    string email = 12;
+    string avatar = 13;
+    Wallet walletBalance = 14;
+    PurchasedItems purchasedItems = 15;
+    int32 wishlistedItems = 16;
+    // For 'friends' and 'personalizedPrices', you need to define the type
+    // If it's a complex type, create a new message
+    // repeated YourType friends = 17;
+    // repeated YourType personalizedPrices = 18;
+    // repeated YourType personalizedSeries = 19;
+}
+
+message Currency {
+    string code = 1;
+    string symbol = 2;
+}
+
+message Language {
+    string code = 1;
+    string name = 2;
+}
+
+message UserChecksum {
+    // For 'cart', 'wishlist', 'reviewsVotes', 'gamesRating', define the types
+    // string cart = 1; // If it's a simple type
+    // message CartType { ... } // If it's a complex type
+    string games = 2;
+    // message WishlistType { ... }
+    // message ReviewsVotesType { ... }
+    // message GamesRatingType { ... }
+}
+
+message UserUpdates {
+    int32 messages = 1;
+    int32 pendingFriendRequests = 2;
+    int32 unreadChatMessages = 3;
+    int32 products = 4;
+    int32 total = 5;
+}
+
+message Wallet {
+    string currency = 1;
+    int32 amount = 2; // assuming amount is within int32 range
+}
+
+message PurchasedItems {
+    int32 games = 1;
+    int32 movies = 2;
+}
