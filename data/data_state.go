@@ -49,6 +49,7 @@ func Save[T types.GogStates](state *T) error {
 	}
 	return nil
 }
+
 func fileExists(filePath string) bool {
 	info, err := os.Stat(filePath)
 	if err == nil {
@@ -80,7 +81,8 @@ func writeFile(filePath string, data []byte) error {
 	if _, err := os.Stat(filePath); err == nil {
 		// File exists, handle accordingly
 		// For example, you can return an error or prompt the user
-		return os.ErrExist
+		return os.WriteFile(filePath, data, 0644)
+		// return os.ErrExist
 	} else if !os.IsNotExist(err) {
 		// Some other error occurred while checking the file
 		return err

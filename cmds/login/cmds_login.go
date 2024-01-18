@@ -42,7 +42,12 @@ func Cmd() *cobra.Command {
 
 			ctx, cancel := chromedp.NewContext(allocCtx)
 
-			defer cancel()
+			defer func() {
+				cancel()
+				if r := recover(); r != nil {
+					panic(r)
+				}
+			}()
 
 			if err = chromedp.Run(ctx, chromedp.Navigate("https://www.gog.com/")); err != nil {
 				log.Fatal(err)
@@ -100,8 +105,9 @@ func Cmd() *cobra.Command {
 					Cookies: obj,
 				}
 
+				// when already exists, it failed
 				if err = data.Save(&auth); err != nil {
-					log.Fatalf("couldn't save your authentication data %w", err)
+					log.Fatalf("couldn't save your authentication data %v", err)
 				}
 
 				signInFound = true
