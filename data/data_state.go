@@ -27,28 +27,12 @@ func getPath() (appDataPath string) {
 	return appDataPath
 }
 
-func getDataPath[T types.GogStates]() string {
+func getDataPath[T types.GogStates](client bool) string {
 	name := strings.ToLower(reflect.TypeOf(*new(T)).Name())
-	return fmt.Sprintf("%v/%v.json", getPath(), name)
-}
-
-func Save[T types.GogStates](state *T) error {
-	var err error
-	var bytesState []byte
-	var appDataPath string = getDataPath[T]()
-	fmt.Println("App Data Path:", appDataPath)
-	if bytesState, err = json.Marshal(*state); err != nil {
-		return err
+	if client {
+		return fmt.Sprintf("%v/client/%v.json", getPath(), name)
 	}
-	if err = writeFile(appDataPath, bytesState); err != nil {
-		if err == os.ErrExist {
-			fmt.Printf("File already exists: %s\n", appDataPath)
-		} else {
-			fmt.Printf("Failed to write to file: %v\n", err)
-		}
-		return err
-	}
-	return nil
+	return fmt.Sprintf("%v/agent/%v.json", getPath(), name)
 }
 
 func fileExists(filePath string) bool {
@@ -60,21 +44,6 @@ func fileExists(filePath string) bool {
 		return false
 	}
 	return false // File may exist but there's an error accessing it
-}
-
-func HasState[T types.GogStates]() bool {
-	return fileExists(getDataPath[T]())
-}
-
-func Load[T types.GogStates]() (state *T, err error) {
-	var appDataPath string = getDataPath[T]()
-	// Read data from file
-	data, err := os.ReadFile(appDataPath)
-	if err != nil {
-		log.Fatalf("Failed to read from file: %v", err)
-		return nil, err
-	}
-	return state, json.Unmarshal(data, state)
 }
 
 func writeFile(filePath string, data []byte) error {
@@ -99,11 +68,55 @@ func writeFile(filePath string, data []byte) error {
 	return os.WriteFile(filePath, data, 0644) // 0644 permissions
 }
 
+var asClient bool = true
+
+func SetRuntime(client bool) {
+	asClient = client
+}
+
+func IsClient() bool {
+	return asClient
+}
+
+func Has[T types.GogStates]() bool {
+	return fileExists(getDataPath[T](IsClient()))
+}
+
+func Load[T types.GogStates]() (state *T, err error) {
+	var appDataPath string = getDataPath[T](IsClient())
+	// Read data from file
+	data, err := os.ReadFile(appDataPath)
+	if err != nil {
+		log.Fatalf("Failed to read from file: %v", err)
+		return nil, err
+	}
+	return state, json.Unmarshal(data, state)
+}
+
 func Delete[T types.GogStates]() error {
-	filePath := getDataPath[T]()
+	filePath := getDataPath[T](IsClient())
 	err := os.Remove(filePath)
 	if err != nil {
 		log.Fatalf("Failed to delete file: %v", err)
+		return err
+	}
+	return nil
+}
+
+func Save[T types.GogStates](state *T) error {
+	var err error
+	var bytesState []byte
+	var appDataPath string = getDataPath[T](IsClient())
+	fmt.Println("App Data Path:", appDataPath)
+	if bytesState, err = json.Marshal(*state); err != nil {
+		return err
+	}
+	if err = writeFile(appDataPath, bytesState); err != nil {
+		if err == os.ErrExist {
+			fmt.Printf("File already exists: %s\n", appDataPath)
+		} else {
+			fmt.Printf("Failed to write to file: %v\n", err)
+		}
 		return err
 	}
 	return nil

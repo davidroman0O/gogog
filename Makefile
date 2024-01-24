@@ -1,5 +1,13 @@
 
 
-# protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./data/grpc/message.proto
-generate:
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./data/net/*.proto
+agent:
+	go run . agent
+
+login:
+	go run . login
+
+logout:
+	go run . logout
+
+gogog:
+	go run .

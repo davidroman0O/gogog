@@ -14,7 +14,7 @@ func Cmd() *cobra.Command {
 		Short: "Remove your login informations",
 		Long:  `.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if !data.HasState[types.GogAuth]() {
+			if !data.Has[types.GogAuth]() {
 				fmt.Println("You have no authentication information")
 				return
 			}

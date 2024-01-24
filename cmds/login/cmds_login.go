@@ -21,7 +21,7 @@ func Cmd() *cobra.Command {
 		Short: "Allowing you to log into your account",
 		Long:  `It will opens a browser, you will have to login and it will find the cookies then quit`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if data.HasState[types.GogAuth]() {
+			if data.Has[types.GogAuth]() {
 				fmt.Println("You already have your authentication information")
 				return
 			}
