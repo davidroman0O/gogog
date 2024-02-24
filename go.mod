@@ -1,6 +1,6 @@
 module github.com/davidroman0O/gogog
 
-go 1.20
+go 1.22
 
 require (
 	github.com/charmbracelet/bubbles v0.17.1
