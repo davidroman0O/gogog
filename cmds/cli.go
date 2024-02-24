@@ -17,6 +17,8 @@ import (
 
 /// GoGog CLI immersive environment which helps to manage the backups from the agent
 
+/// I don't think i'm going to do the immersive environment, but i'm going to make the api (no gin, no fiber) and webui (htmx) just to rush the project
+
 func Cmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "gogog",
