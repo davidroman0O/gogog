@@ -2,12 +2,13 @@ package web
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/davidroman0O/gogog/views"
+	"github.com/davidroman0O/gogog/web"
 	"github.com/spf13/cobra"
 )
 
@@ -27,10 +28,55 @@ func Cmd() *cobra.Command {
 			}
 
 			mux := http.NewServeMux()
+
 			mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != "/" {
+					http.Redirect(w, r, "/404", http.StatusFound)
+					return
+				}
 				w.WriteHeader(200)
 				w.Header().Add("Content-Type", "text/html")
-				if err := views.Hello("myself").Render(context.Background(), w); err != nil {
+				if err := web.Index().Render(context.Background(), w); err != nil {
+					panic(err)
+				}
+			})
+
+			mux.HandleFunc("GET /accounts", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				w.Header().Add("Content-Type", "text/html")
+				if err := web.Index().Render(context.Background(), w); err != nil {
+					panic(err)
+				}
+			})
+
+			mux.HandleFunc("GET /games", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				w.Header().Add("Content-Type", "text/html")
+				if err := web.Index().Render(context.Background(), w); err != nil {
+					panic(err)
+				}
+			})
+
+			mux.HandleFunc("GET /backups", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				w.Header().Add("Content-Type", "text/html")
+				if err := web.Index().Render(context.Background(), w); err != nil {
+					panic(err)
+				}
+			})
+
+			mux.HandleFunc("GET /downloads", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				w.Header().Add("Content-Type", "text/html")
+				if err := web.Index().Render(context.Background(), w); err != nil {
+					panic(err)
+				}
+			})
+
+			mux.HandleFunc("GET /404", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				w.Header().Add("Content-Type", "text/html")
+				if err := web.PageNotFound().Render(context.Background(), w); err != nil {
 					panic(err)
 				}
 			})
@@ -38,6 +84,7 @@ func Cmd() *cobra.Command {
 			server.Handler = mux
 
 			go func() {
+				slog.Info("server started")
 				if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 					panic(err)
 				}
