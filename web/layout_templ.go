@@ -36,7 +36,7 @@ func BasePage(title string, navbar NavigationBar, scripts ...templ.Component) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script><script src=\"/static/js/dropzone.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/dropzone.min.css\" type=\"text/css\"></head><body class=\"dark bg-white dark:bg-blue-500\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script><script src=\"/static/js/dropzone.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/dropzone.min.css\" type=\"text/css\"></head><body class=\"bg-white\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

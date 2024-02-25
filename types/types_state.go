@@ -11,7 +11,7 @@ const (
 type Gogog struct{}
 
 type GogAuthenticationChrome struct {
-	Cookies []*Cookie
+	Cookies []Cookie
 	User    *UserData
 }
 

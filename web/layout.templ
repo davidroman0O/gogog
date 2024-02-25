@@ -14,7 +14,7 @@ templ BasePage(title string, navbar NavigationBar, scripts ...templ.Component) {
 			<script src="/static/js/dropzone.min.js"></script>	
 			<link rel="stylesheet" href="/static/css/dropzone.min.css" type="text/css" />
 		</head>
-		<body class="dark bg-white dark:bg-blue-500">
+		<body class="bg-white">
 			@Navigation(navbar)
 			<main class="container mx-auto">
 				{ children... }

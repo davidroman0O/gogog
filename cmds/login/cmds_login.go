@@ -63,7 +63,7 @@ func Cmd() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			var obj []*types.Cookie
+			var obj []types.Cookie
 			signInFound := false
 			for !signInFound {
 				// "Sign In" is no longer found, assume user has signed in

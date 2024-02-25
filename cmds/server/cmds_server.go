@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"time"
 
+	"github.com/Jeffail/tunny"
 	"github.com/davidroman0O/gogog/data"
 	"github.com/davidroman0O/gogog/types"
 	"github.com/davidroman0O/gogog/web"
@@ -22,8 +24,6 @@ import (
 func MiddlewareAccount(handler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		total, err := data.CountAccounts()
-		slog.Info(fmt.Sprintf("total accounts: %d", total))
-		fmt.Println(total, err)
 		if err != nil {
 			fmt.Println("err", err)
 			http.Redirect(w, r, fmt.Sprintf("/error?error=%v", err), http.StatusTemporaryRedirect)
@@ -50,6 +50,51 @@ func Cmd() *cobra.Command {
 			if err := data.Initialize("./tmp"); err != nil {
 				panic(err)
 			}
+
+			numCPUs := runtime.NumCPU()
+
+			tmpStateDownload := false
+
+			poolGameCache := tunny.NewFunc(numCPUs, func(payload interface{}) interface{} {
+				var result []byte
+
+				switch msg := payload.(type) {
+				case []types.Account:
+					gogClient := data.NewGogClient()
+
+					for _, account := range msg {
+
+						if err := data.SetCookies(gogClient.Client, account.Cookies, types.Hostname); err != nil {
+							return err
+						}
+
+						params, err := types.NewSearchParams()
+
+						if err != nil {
+							return err
+						}
+
+						products, err := data.Search(gogClient.Client, types.Hostname, *params)
+						if err != nil {
+							return err
+						}
+
+						for _, v := range products {
+							data.GamesDB().Save(&v)
+							slog.Info("save %v", v.Title)
+						}
+					}
+
+					tmpStateDownload = false
+
+				default:
+					slog.Info("it's not an account array")
+				}
+
+				return result
+			})
+
+			defer poolGameCache.Close()
 
 			server := &http.Server{
 				Addr:         ":8080",
@@ -119,7 +164,13 @@ func Cmd() *cobra.Command {
 				w.Header().Set("Pragma", "no-cache")
 				w.Header().Set("Expires", "0")
 				w.Header().Add("Content-Type", "text/html")
-				if err := web.PageGames().Render(context.Background(), w); err != nil {
+				data, err := data.GetGames()
+				if err != nil {
+					http.Redirect(w, r, "/404", http.StatusFound)
+					return
+				}
+				pp.Println(data)
+				if err := web.PageGames(tmpStateDownload, data).Render(context.Background(), w); err != nil {
 					panic(err)
 				}
 			}))
@@ -245,7 +296,7 @@ func Cmd() *cobra.Command {
 					return
 				}
 
-				var obj []*types.Cookie
+				var obj []types.Cookie
 				var datamap map[string]interface{}
 				var dataCookies []byte
 
@@ -299,6 +350,17 @@ func Cmd() *cobra.Command {
 					w.Write([]byte("couldn't save your authentication data"))
 					return
 				}
+
+				// TODO @droman: check if the account already exists but for now...
+				accounts, err := data.GetAccounts()
+				if err != nil {
+					w.WriteHeader(400)
+					w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+					w.Write([]byte("bad request"))
+				}
+
+				go poolGameCache.Process(accounts)
+				tmpStateDownload = true
 
 				w.WriteHeader(200)
 				w.Write([]byte("file uploaded: " + handler.Filename))

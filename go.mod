@@ -15,6 +15,7 @@ require (
 )
 
 require (
+	github.com/Jeffail/tunny v0.1.4 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/asdine/storm/v3 v3.2.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
