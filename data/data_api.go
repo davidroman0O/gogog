@@ -35,6 +35,10 @@ func Ping() error {
 	return errors.Join(ErrUnreachable, fmt.Errorf("couldn't ping the api"))
 }
 
+func CountAccounts() (int, error) {
+	return dbAccounts.Count(&types.Account{})
+}
+
 func GetAccounts() ([]types.Account, error) {
 	var accounts []types.Account
 

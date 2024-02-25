@@ -10,7 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
-func BasePage(title string, navbar NavigationBar) templ.Component {
+func BasePage(title string, navbar NavigationBar, scripts ...templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -36,7 +36,7 @@ func BasePage(title string, navbar NavigationBar) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script></head><body class=\"dark bg-white dark:bg-blue-500\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script><script src=\"/static/js/dropzone.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/dropzone.min.css\" type=\"text/css\"></head><body class=\"dark bg-white dark:bg-blue-500\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -52,7 +52,17 @@ func BasePage(title string, navbar NavigationBar) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, script := range scripts {
+			templ_7745c5c3_Err = script.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

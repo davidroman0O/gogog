@@ -1,0 +1,13 @@
+package web
+
+
+templ PageError(err error) {
+	@BasePage(
+			"Gogogo",
+			NavigationBar{
+				Home: true,
+			},
+		) {
+		<div class="container">{err.Error()}</div>
+	}
+}

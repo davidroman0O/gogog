@@ -1,0 +1,47 @@
+package web
+
+// OnboardingPage is the page to upload cookies from Gog directly
+// TODO @droman: I should add a documentation on exactly how to do it manually OR to use the cli `login` that leverage chronium
+templ PageOnboarding() {
+	@BasePage(
+			"Gogogo",
+			NavigationBar{
+				Home: true,
+			},
+		) {
+		<div class="container mx-auto">
+			<form action="/api/v1/cookies" id="cookies" class="dropzone" method="post" enctype="multipart/form-data">
+				<div class="fallback">
+					<input name="cookies" type="file" />
+				</div>
+			</form>
+		</div>
+		<script>
+			document.addEventListener("DOMContentLoaded", function() {
+				let myDropzone = document.querySelector("#cookies").dropzone;
+				myDropzone.on("addedfile", function(file) {
+					if (file.type !== "application/json") {
+						myDropzone.removeFile(file);
+						alert("file as to be a json")
+						return
+					}
+					if (file.size > 1000000) {
+						myDropzone.removeFile(file);
+						alert("file is too big")
+						return
+					}
+					if (!file.name.endsWith(".json")) {
+						myDropzone.removeFile(file);
+						alert("file has to end with .json")
+						return
+					}
+					console.log(file);
+				});
+				myDropzone.on("success", function(file, response) {
+					console.log(response);
+					window.location.href = "/accounts";
+				});
+			});
+		</script>
+	}
+}
