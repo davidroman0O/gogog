@@ -1,8 +1,12 @@
 package web
 
-
 templ Index() {
-	@BasePage("Gogogo") {
+	@BasePage(
+			"Gogogo",
+			NavigationBar{
+				Home: true,
+			},
+		) {
 		<div class="container">hello world</div>
 	}
 }

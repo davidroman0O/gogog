@@ -10,7 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
-func BasePage(title string) templ.Component {
+func BasePage(title string, navbar NavigationBar) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -36,11 +36,11 @@ func BasePage(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"https://unpkg.com/htmx.org@1.9.6\" integrity=\"sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni\" crossorigin=\"anonymous\"></script><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"dark bg-white dark:bg-blue-500\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script></head><body class=\"dark bg-white dark:bg-blue-500\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Navigation(NavigationBar{Disabled: true}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Navigation(navbar).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

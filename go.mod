@@ -10,11 +10,13 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20240116100315-4a0ec5e4c400
 	github.com/chromedp/chromedp v0.9.3
 	github.com/gofiber/fiber/v2 v2.52.0
+	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/spf13/cobra v1.8.0
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/asdine/storm/v3 v3.2.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
@@ -40,8 +42,9 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/sync v0.4.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	go.etcd.io/bbolt v1.3.9 // indirect
+	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )

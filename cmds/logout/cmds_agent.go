@@ -14,11 +14,11 @@ func Cmd() *cobra.Command {
 		Short: "Remove your login informations",
 		Long:  `.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if !data.Has[types.GogAuth]() {
+			if !data.Has[types.GogAuthenticationChrome]() {
 				fmt.Println("You have no authentication information")
 				return
 			}
-			if err := data.Delete[types.GogAuth](); err != nil {
+			if err := data.Delete[types.GogAuthenticationChrome](); err != nil {
 				fmt.Printf("Failed to delete your authentication information: %v\n", err)
 				return
 			}

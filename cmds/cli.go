@@ -25,7 +25,7 @@ func Cmd() *cobra.Command {
 		Short: "GoG backup manager",
 		Long:  `Manager of your GoG games backups`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if !data.Has[types.GogAuth]() {
+			if !data.Has[types.GogAuthenticationChrome]() {
 				fmt.Println("please use `gogog login` and get your cookies to use `gogog`")
 				return
 			}

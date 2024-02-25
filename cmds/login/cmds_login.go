@@ -3,8 +3,8 @@ package login
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -21,9 +21,14 @@ func Cmd() *cobra.Command {
 		Short: "Allowing you to log into your account",
 		Long:  `It will opens a browser, you will have to login and it will find the cookies then quit`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if data.Has[types.GogAuth]() {
-				fmt.Println("You already have your authentication information")
-				return
+			// if data.Has[types.GogAuthenticationChrome]() {
+			// 	fmt.Println("You already have your authentication information")
+			// 	return
+			// }
+
+			if err := data.Ping(); err != nil {
+				slog.Error("Couldn't reach the api", err)
+				panic(err)
 			}
 
 			log.Println("Please login then close the window")
@@ -79,6 +84,11 @@ func Cmd() *cobra.Command {
 				var bytesCookies []byte
 
 				bytesCookies, err = json.Marshal(cookies)
+				if err != nil {
+					log.Fatal(err)
+					time.Sleep(1 * time.Second)
+					continue
+				}
 
 				err = json.Unmarshal(bytesCookies, &obj)
 				if err != nil {
@@ -106,13 +116,12 @@ func Cmd() *cobra.Command {
 					continue
 				}
 
-				auth := types.GogAuth{
+				auth := types.GogAuthenticationChrome{
 					Cookies: obj,
 					User:    user,
 				}
 
-				// when already exists, it failed
-				if err = data.Save(&auth); err != nil {
+				if err := data.PostAccount(auth); err != nil {
 					log.Fatalf("couldn't save your authentication data %v", err)
 				}
 
