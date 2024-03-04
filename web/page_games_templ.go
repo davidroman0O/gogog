@@ -10,10 +10,120 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/davidroman0O/gogog/types"
-import "fmt"
+func gameTable() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_gameTable_86b9`,
+		Function: `function __templ_gameTable_86b9(){const format = (d) => {
+		return '<dl>' +
+				'<dt>Title:</dt>' +
+				'<dd>' +
+				d.title +
+				'</dd>' +
+			'</dl>';
+	}
 
-func PageGames(loading bool, products []types.Product) templ.Component {
+	var table = new DataTable('#games-table', {
+		"processing": true,
+        "serverSide": true,
+        "ajax": "/games/table",
+        "columns": [
+			{
+				className: "dt-control",
+				orderable: false,
+				data: null,
+				defaultContent: "",
+			},
+            { 
+				data: "title"
+			},
+            {
+				data: "category"
+			},
+            {
+				data: "platforms",
+				render: function(data, type, row) {
+					// If platforms is an array, join it into a string
+					return data.join(", ");
+            	}
+			},
+            {
+				data: "downloaded", 
+				render: function(data, type, row) {
+					return ` + "`" + `<span class="inline-flex flex-shrink-0 items-center rounded-full bg-${data ? "green" : "red"}-50 px-1.5 py-0.5 text-xs font-medium text-${data ? "green" : "red"}-700 ring-1 ring-inset ring-${data ? "green" : "red"}-600/20">${data ? "downloaded" : "no backup"}</span>` + "`" + `
+            	}
+			}
+        ],
+		///
+		responsive: true,
+		select: true,
+		layout: {
+			topStart: {
+				buttons: ['pageLength', 'selectAll', 'selectNone'] // Add 'selectNone' button
+			}
+		},
+		buttons: [
+			{
+				extend: 'selected',
+				text: 'Count selected rows',
+				action: function (e, dt, button, config) {
+					alert(
+						dt.rows({ selected: true }).indexes().length + ' row(s) selected'
+					);
+				}
+			}
+		],
+		// "initComplete": function(settings, json) {
+		// 	// Target the DataTable wrapper
+		// 	// $(this).closest('.dataTables_wrapper').addClass('myCustomWrapperClass');
+			
+		// 	// Target the table and its components directly
+		// 	var api = this.api();
+
+		// 	$(api.table()).addClass('leading-normal');
+		// 	// $(api.table().header()).addClass('myCustomHeaderClass');
+		// 	// $(api.table().body()).addClass('myCustomBodyClass');
+			
+		// 	// Apply classes to each row
+		// 	// api.rows().every(function() {
+		// 	// 	$(this.node()).addClass('myCustomRowClass');
+		// 	// });
+
+		// 	// Apply classes to a specific column, e.g., the first column
+		// 	// $(api.columns(0).header()).addClass('myCustomColumnHeaderClass');
+		// 	// api.columns(0).nodes().flatten().to$().addClass('myCustomColumnClass');
+			
+		// 	// Additional customizations can be added here
+		// },
+		// pagingType: "scrolling"
+	});
+
+	new $.fn.dataTable.FixedHeader(table);
+
+	// Add event listener for opening and closing details
+	table.on('click', 'td.dt-control', function (e) {
+		let tr = e.target.closest('tr');
+		let row = table.row(tr);
+	
+		if (row.child.isShown()) {
+			// This row is already open - close it
+			row.child.hide();
+		}
+		else {
+			// Open this row
+			row.child(format(row.data())).show();
+		}
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_gameTable_86b9`),
+		CallInline: templ.SafeScriptInline(`__templ_gameTable_86b9`),
+	}
+}
+
+//	css dataTables_scrollBody() {
+//		max-height: 400px;
+//		overflow-y: auto;
+//	}
+func PageGames(loading bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -42,83 +152,13 @@ func PageGames(loading bool, products []types.Product) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			if len(products) == 0 {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"alert alert-warning\" role=\"alert\">No games found</div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\"><div class=\"relative\"><!-- Selected row actions, only show when rows are selected. --><!-- <div class=\"absolute top-0 left-14 flex h-12 items-center space-x-3 bg-white sm:left-12\"> --><!--   <button type=\"button\" class=\"inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white\">Bulk edit</button> --><!--   <button type=\"button\" class=\"inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white\">Delete all</button> --><!-- </div> --><table id=\"games-table\" class=\"display compact\"><thead><tr><th></th><th>Title</th><th>Category</th><th>Platforms</th><th>Downloaded</th></tr></thead> <tbody><!-- Selected: \"bg-gray-50\" --></tbody></table></div></div></div></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
-			if len(products) > 0 {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\"><div class=\"relative\"><!-- Selected row actions, only show when rows are selected. --><!-- <div class=\"absolute top-0 left-14 flex h-12 items-center space-x-3 bg-white sm:left-12\"> --><!--   <button type=\"button\" class=\"inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white\">Bulk edit</button> --><!--   <button type=\"button\" class=\"inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white\">Delete all</button> --><!-- </div> --><table class=\"min-w-full table-fixed divide-y divide-gray-300\"><thead><tr><th scope=\"col\" class=\"relative px-7 sm:w-12 sm:px-6\"><input type=\"checkbox\" class=\"absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600\"></th><th scope=\"col\" class=\"min-w-[12rem] py-3.5 pr-3 text-left text-sm font-semibold text-gray-900\">Title</th><th scope=\"col\" class=\"px-3 py-3.5 text-left text-sm font-semibold text-gray-900\">Category</th><th scope=\"col\" class=\"px-3 py-3.5 text-left text-sm font-semibold text-gray-900\">Platforms</th><th scope=\"col\" class=\"px-3 py-3.5 text-left text-sm font-semibold text-gray-900\">Downloaded</th><th scope=\"col\" class=\"relative py-3.5 pl-3 pr-4 sm:pr-3\"><span class=\"sr-only\">Edit</span></th></tr></thead> <tbody class=\"divide-y divide-gray-200 bg-white\"><!-- Selected: \"bg-gray-50\" -->")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				for _, product := range products {
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr><td class=\"relative px-7 sm:w-12 sm:px-6\"><!-- Selected row marker, only show when row is selected. --><!-- <div class=\"absolute inset-y-0 left-0 w-0.5 bg-indigo-600\"></div> --><input type=\"checkbox\" class=\"absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600\"></td><!-- Selected: \"text-indigo-600\", Not Selected: \"text-gray-900\" --><td class=\"whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900\"><div class=\"flex flex-row items-center gap-5\"><img class=\"h-10 w-10 flex-shrink-0 rounded-full bg-gray-300\" src=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("%v.png", product.Image)))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"\"> ")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var3 string
-					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(product.Title)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/page_games.templ`, Line: 66, Col: 24}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></td><td class=\"whitespace-nowrap px-3 py-4 text-sm text-gray-500\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var4 string
-					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(product.Category)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/page_games.templ`, Line: 69, Col: 87}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"whitespace-nowrap px-3 py-4 text-sm text-gray-500\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					if product.WorksOn.Windows {
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20\">Windows</span>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					if product.WorksOn.Mac {
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20\">Mac</span>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					if product.WorksOn.Linux {
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20\">Linux</span>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"whitespace-nowrap px-3 py-4 text-sm text-gray-500\"><span class=\"inline-flex flex-shrink-0 items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20\">No backup</span></td><td class=\"whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3\"><a href=\"#\" class=\"text-indigo-600 hover:text-indigo-900\">Edit<span class=\"sr-only\">, Lindsay Walton</span></a></td></tr>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table></div></div></div></div></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			templ_7745c5c3_Err = gameTable().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 			if templ_7745c5c3_Err != nil {

@@ -36,7 +36,7 @@ func BasePage(title string, navbar NavigationBar, scripts ...templ.Component) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script><script src=\"/static/js/dropzone.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/dropzone.min.css\" type=\"text/css\"></head><body class=\"bg-white\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><script src=\"https://code.jquery.com/jquery-3.7.1.min.js\"></script><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/tailwindcss.js\"></script><script src=\"/static/js/draggable.min.js\"></script><script src=\"/static/js/dropzone.min.js\"></script><script src=\"/static/js/datatables/datatables.min.js\"></script><script src=\"/static/js/datatables/Buttons-3.0.0/js/dataTables.buttons.min.js\"></script><script src=\"/static/js/datatables/FixedHeader-4.0.0/js/fixedHeader.dataTables.js\"></script><link rel=\"stylesheet\" href=\"/static/js/datatables/datatables.min.css\" type=\"text/css\"><link rel=\"stylesheet\" href=\"/static/js/datatables/Buttons-3.0.0/css/buttons.dataTables.min.css\" type=\"text/css\"><link rel=\"stylesheet\" href=\"/static/js/datatables/FixedHeader-4.0.0/css/fixedHeader.dataTables.min.css\" type=\"text/css\"><link rel=\"stylesheet\" href=\"/static/css/dropzone.min.css\" type=\"text/css\"></head><body class=\"bg-white\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

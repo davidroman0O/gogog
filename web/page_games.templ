@@ -1,10 +1,116 @@
 package web
 
-import "github.com/davidroman0O/gogog/types"
-import "fmt"
 
+script gameTable() {
 
-templ PageGames(loading bool, products []types.Product) {
+	const format = (d) => {
+		return '<dl>' +
+				'<dt>Title:</dt>' +
+				'<dd>' +
+				d.title +
+				'</dd>' +
+			'</dl>';
+	}
+
+	var table = new DataTable('#games-table', {
+		"processing": true,
+        "serverSide": true,
+        "ajax": "/games/table",
+        "columns": [
+			{
+				className: "dt-control",
+				orderable: false,
+				data: null,
+				defaultContent: "",
+			},
+            { 
+				data: "title"
+			},
+            {
+				data: "category"
+			},
+            {
+				data: "platforms",
+				render: function(data, type, row) {
+					// If platforms is an array, join it into a string
+					return data.join(", ");
+            	}
+			},
+            {
+				data: "downloaded", 
+				render: function(data, type, row) {
+					return `<span class="inline-flex flex-shrink-0 items-center rounded-full bg-${data ? "green" : "red"}-50 px-1.5 py-0.5 text-xs font-medium text-${data ? "green" : "red"}-700 ring-1 ring-inset ring-${data ? "green" : "red"}-600/20">${data ? "downloaded" : "no backup"}</span>`
+            	}
+			}
+        ],
+		///
+		responsive: true,
+		select: true,
+		layout: {
+			topStart: {
+				buttons: ['pageLength', 'selectAll', 'selectNone'] // Add 'selectNone' button
+			}
+		},
+		buttons: [
+			{
+				extend: 'selected',
+				text: 'Count selected rows',
+				action: function (e, dt, button, config) {
+					alert(
+						dt.rows({ selected: true }).indexes().length + ' row(s) selected'
+					);
+				}
+			}
+		],
+		// "initComplete": function(settings, json) {
+		// 	// Target the DataTable wrapper
+		// 	// $(this).closest('.dataTables_wrapper').addClass('myCustomWrapperClass');
+			
+		// 	// Target the table and its components directly
+		// 	var api = this.api();
+
+		// 	$(api.table()).addClass('leading-normal');
+		// 	// $(api.table().header()).addClass('myCustomHeaderClass');
+		// 	// $(api.table().body()).addClass('myCustomBodyClass');
+			
+		// 	// Apply classes to each row
+		// 	// api.rows().every(function() {
+		// 	// 	$(this.node()).addClass('myCustomRowClass');
+		// 	// });
+
+		// 	// Apply classes to a specific column, e.g., the first column
+		// 	// $(api.columns(0).header()).addClass('myCustomColumnHeaderClass');
+		// 	// api.columns(0).nodes().flatten().to$().addClass('myCustomColumnClass');
+			
+		// 	// Additional customizations can be added here
+		// },
+		// pagingType: "scrolling"
+	});
+
+	new $.fn.dataTable.FixedHeader(table);
+
+	// Add event listener for opening and closing details
+	table.on('click', 'td.dt-control', function (e) {
+		let tr = e.target.closest('tr');
+		let row = table.row(tr);
+	
+		if (row.child.isShown()) {
+			// This row is already open - close it
+			row.child.hide();
+		}
+		else {
+			// Open this row
+			row.child(format(row.data())).show();
+		}
+	});
+}
+
+// css dataTables_scrollBody() {
+// 	max-height: 400px;
+// 	overflow-y: auto;
+// }
+
+templ PageGames(loading bool) {
 	@BasePage(
 			"Gogogo - Games",
 			NavigationBar{
@@ -16,13 +122,7 @@ templ PageGames(loading bool, products []types.Product) {
 				<div class="alert alert-info" role="alert">
 					Downloading games...
 				</div>
-			} 
-			if len(products) == 0 {
-				<div class="alert alert-warning" role="alert">
-					No games found
-				</div>
 			}
-			if len(products) > 0 {
 			<div class="px-4 sm:px-6 lg:px-8">
 			<div class="mt-8 flow-root">
 				<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -33,60 +133,59 @@ templ PageGames(loading bool, products []types.Product) {
 					<!--   <button type="button" class="inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white">Bulk edit</button> -->
 					<!--   <button type="button" class="inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white">Delete all</button> -->
 					<!-- </div> -->
-
-					<table class="min-w-full table-fixed divide-y divide-gray-300">
+					<table id="games-table" class="display compact">
 						<thead>
 						<tr>
-							<th scope="col" class="relative px-7 sm:w-12 sm:px-6">
-							<input type="checkbox" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
+							<th>
+								
 							</th>
-							<th scope="col" class="min-w-[12rem] py-3.5 pr-3 text-left text-sm font-semibold text-gray-900">Title</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Category</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Platforms</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Downloaded</th>
-							<th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-3">
-								<span class="sr-only">Edit</span>
+							<th>
+								Title
+							</th>
+							<th>
+								Category
+							</th>
+							<th>
+								Platforms
+							</th>
+							<th>
+								Downloaded
 							</th>
 						</tr>
 						</thead>
-						<tbody class="divide-y divide-gray-200 bg-white">
+						<tbody>
+
 						<!-- Selected: "bg-gray-50" -->
 
-						for _, product := range products {
-							<tr>
-								<td class="relative px-7 sm:w-12 sm:px-6">
-								<!-- Selected row marker, only show when row is selected. -->
-								<!-- <div class="absolute inset-y-0 left-0 w-0.5 bg-indigo-600"></div> -->
-
-								<input type="checkbox" class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"/>
-								</td>
-								<!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" -->
-								<td class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900">
-									<div class="flex flex-row items-center gap-5">
-										<img class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300" src={fmt.Sprintf("%v.png", product.Image)} alt=""/>
-										{product.Title}
-									</div>
-								</td>
-								<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{product.Category}</td>
-								<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-									if product.WorksOn.Windows {
-										<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Windows</span>
-									}
-									if product.WorksOn.Mac {
-										<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Mac</span>
-									}
-									if product.WorksOn.Linux {
-										<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Linux</span>
-									}
-								</td>
-								<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-									<span class="inline-flex flex-shrink-0 items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">No backup</span>
-								</td>
-								<td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
-								<a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a>
-								</td>
-							</tr>
-						}
+						// for _, product := range products {
+						// 	<tr>
+						// 		<!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" -->
+						// 		<td class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900">
+						// 			<div class="flex flex-row items-center gap-5">
+						// 				<img class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300" src={fmt.Sprintf("%v.png", product.Image)} alt=""/>
+						// 				{product.Title}
+						// 			</div>
+						// 		</td>
+						// 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{product.Category}</td>
+						// 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+						// 			if product.WorksOn.Windows {
+						// 				<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Windows</span>
+						// 			}
+						// 			if product.WorksOn.Mac {
+						// 				<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Mac</span>
+						// 			}
+						// 			if product.WorksOn.Linux {
+						// 				<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Linux</span>
+						// 			}
+						// 		</td>
+						// 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+						// 			<span class="inline-flex flex-shrink-0 items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">No backup</span>
+						// 		</td>
+						// 		<td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
+						// 		<a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a>
+						// 		</td>
+						// 	</tr>
+						// }
 
 						</tbody>
 					</table>
@@ -95,8 +194,8 @@ templ PageGames(loading bool, products []types.Product) {
 				</div>
 			</div>
 			</div>
-			}
-			
+			// invoke the js code
+			@gameTable()
 		</div>
 	}
 }

@@ -8,10 +8,22 @@ templ BasePage(title string, navbar NavigationBar, scripts ...templ.Component) {
 			<meta charset="UTF-8" />
 	        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			<title>{ title }</title>
+			<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>	
+
 			<script src="/static/js/htmx.min.js"></script>
 			<script src="/static/js/tailwindcss.js"></script>
+
 			<script src="/static/js/draggable.min.js"></script>
 			<script src="/static/js/dropzone.min.js"></script>	
+			
+			<script src="/static/js/datatables/datatables.min.js"></script>	
+			<script src="/static/js/datatables/Buttons-3.0.0/js/dataTables.buttons.min.js"></script>	
+			<script src="/static/js/datatables/FixedHeader-4.0.0/js/fixedHeader.dataTables.js"></script>	
+
+			<link rel="stylesheet" href="/static/js/datatables/datatables.min.css" type="text/css" />
+			<link rel="stylesheet" href="/static/js/datatables/Buttons-3.0.0/css/buttons.dataTables.min.css" type="text/css" />
+			<link rel="stylesheet" href="/static/js/datatables/FixedHeader-4.0.0/css/fixedHeader.dataTables.min.css" type="text/css" />
+			
 			<link rel="stylesheet" href="/static/css/dropzone.min.css" type="text/css" />
 		</head>
 		<body class="bg-white">
