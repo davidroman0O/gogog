@@ -105,10 +105,6 @@ script gameTable() {
 	});
 }
 
-// css dataTables_scrollBody() {
-// 	max-height: 400px;
-// 	overflow-y: auto;
-// }
 
 templ PageGames(loading bool) {
 	@BasePage(
@@ -124,75 +120,38 @@ templ PageGames(loading bool) {
 				</div>
 			}
 			<div class="px-4 sm:px-6 lg:px-8">
-			<div class="mt-8 flow-root">
-				<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-				<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-					<div class="relative">
-					<!-- Selected row actions, only show when rows are selected. -->
-					<!-- <div class="absolute top-0 left-14 flex h-12 items-center space-x-3 bg-white sm:left-12"> -->
-					<!--   <button type="button" class="inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white">Bulk edit</button> -->
-					<!--   <button type="button" class="inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white">Delete all</button> -->
-					<!-- </div> -->
-					<table id="games-table" class="display compact">
-						<thead>
-						<tr>
-							<th>
-								
-							</th>
-							<th>
-								Title
-							</th>
-							<th>
-								Category
-							</th>
-							<th>
-								Platforms
-							</th>
-							<th>
-								Downloaded
-							</th>
-						</tr>
-						</thead>
-						<tbody>
+				<div class="mt-8 flow-root">
+					<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+						<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+							<div class="relative">
+								<table id="games-table" class="display compact">
+									<thead>
+									<tr>
+										<th>
+											Title
+										</th>
+										<th>
+											Title
+										</th>
+										<th>
+											Category
+										</th>
+										<th>
+											Platforms
+										</th>
+										<th>
+											Downloaded
+										</th>
+									</tr>
+									</thead>
+									<tbody>
 
-						<!-- Selected: "bg-gray-50" -->
-
-						// for _, product := range products {
-						// 	<tr>
-						// 		<!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" -->
-						// 		<td class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900">
-						// 			<div class="flex flex-row items-center gap-5">
-						// 				<img class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300" src={fmt.Sprintf("%v.png", product.Image)} alt=""/>
-						// 				{product.Title}
-						// 			</div>
-						// 		</td>
-						// 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{product.Category}</td>
-						// 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-						// 			if product.WorksOn.Windows {
-						// 				<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Windows</span>
-						// 			}
-						// 			if product.WorksOn.Mac {
-						// 				<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Mac</span>
-						// 			}
-						// 			if product.WorksOn.Linux {
-						// 				<span class="inline-flex flex-shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Linux</span>
-						// 			}
-						// 		</td>
-						// 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-						// 			<span class="inline-flex flex-shrink-0 items-center rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">No backup</span>
-						// 		</td>
-						// 		<td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3">
-						// 		<a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a>
-						// 		</td>
-						// 	</tr>
-						// }
-
-						</tbody>
-					</table>
+									</tbody>
+								</table>
+							</div>
+						</div>
 					</div>
 				</div>
-				</div>
-			</div>
 			</div>
 			// invoke the js code
 			@gameTable()

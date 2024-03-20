@@ -119,10 +119,6 @@ func gameTable() templ.ComponentScript {
 	}
 }
 
-//	css dataTables_scrollBody() {
-//		max-height: 400px;
-//		overflow-y: auto;
-//	}
 func PageGames(loading bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -152,7 +148,7 @@ func PageGames(loading bool) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\"><div class=\"relative\"><!-- Selected row actions, only show when rows are selected. --><!-- <div class=\"absolute top-0 left-14 flex h-12 items-center space-x-3 bg-white sm:left-12\"> --><!--   <button type=\"button\" class=\"inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white\">Bulk edit</button> --><!--   <button type=\"button\" class=\"inline-flex items-center rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white\">Delete all</button> --><!-- </div> --><table id=\"games-table\" class=\"display compact\"><thead><tr><th></th><th>Title</th><th>Category</th><th>Platforms</th><th>Downloaded</th></tr></thead> <tbody><!-- Selected: \"bg-gray-50\" --></tbody></table></div></div></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\"><div class=\"relative\"><table id=\"games-table\" class=\"display compact\"><thead><tr><th>Title</th><th>Title</th><th>Category</th><th>Platforms</th><th>Downloaded</th></tr></thead> <tbody></tbody></table></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
