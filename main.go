@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	cli "github.com/davidroman0O/gogog/cmds"
-	"github.com/davidroman0O/gogog/cmds/agent"
-	"github.com/davidroman0O/gogog/cmds/login"
-	"github.com/davidroman0O/gogog/cmds/logout"
-	"github.com/davidroman0O/gogog/cmds/server"
+	cli "github.com/davidroman0O/gogog/cmd"
+	"github.com/davidroman0O/gogog/cmd/agent"
+	"github.com/davidroman0O/gogog/cmd/login"
+	"github.com/davidroman0O/gogog/cmd/logout"
+	"github.com/davidroman0O/gogog/cmd/server"
 )
 
 func main() {

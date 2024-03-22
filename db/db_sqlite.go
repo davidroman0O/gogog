@@ -2,47 +2,17 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
+var config *initConfig
 var connectionString string
 
-type FileMode string
-
-const (
-	ReadWrite FileMode = "rw"
-	Memory    FileMode = "memory"
-)
-
-type dbConfig struct {
-	file FileMode
-}
-
-type dbOption func(*dbConfig)
-
-func WithFileMode(fileMode FileMode) dbOption {
-	return func(config *dbConfig) {
-		config.file = fileMode
-	}
-}
-
-func NewSettingConfig(options ...dbOption) *dbConfig {
-	config := &dbConfig{}
-	for _, option := range options {
-		option(config)
-	}
-	return config
-}
-
-func getEnvDefault(key, defaultValue string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return defaultValue
+func Do(cb func(db *sql.DB) error) error {
+	return cb(db)
 }
 
 type initConfig struct {
@@ -58,20 +28,20 @@ func WithDBConfig(opts ...dbOption) initOpts {
 }
 
 func Initialize(opts ...initOpts) error {
-	config := initConfig{}
-	for _, opt := range opts {
-		opt(&config)
+	if config == nil {
+		config = &initConfig{}
+		for _, opt := range opts {
+			opt(config)
+		}
 	}
-
-	params := map[string]string{
-		"file":  fmt.Sprintf("%v:%v", getEnvDefault("DB_PATH", "./tmp/"), getEnvDefault("DB_NAME", "gogog.db")),
-		"mode":  getEnvDefault("DB_MODE", "rw"),
-		"_sync": getEnvDefault("DB_SYNC", "full"), // we like it safe here
-	}
-
-	connectionString = fmt.Sprintf("%v?mode=%v", params["file"], params["mode"])
 
 	var err error
+	var connectionString string
+
+	if connectionString, err = ConnectionString(config.db); err != nil {
+		return err
+	}
+
 	if db, err = sql.Open("sqlite3", connectionString); err != nil {
 		return err
 	}
@@ -79,9 +49,15 @@ func Initialize(opts ...initOpts) error {
 	return nil
 }
 
-func Clear() error {
+func Close() error {
 	if db != nil {
-		os.Remove("./foo.db")
+		// Check if the file exists
+		if _, err := os.Stat(config.db.filePath); err == nil {
+			// Remove the file
+			if err := os.Remove(config.db.filePath); err != nil {
+				return err
+			}
+		}
 		db.Close()
 	}
 	return nil
