@@ -140,6 +140,8 @@ func (m *JobMiddleware) OnDelete(db string, table string, rowid int64) error {
 var global *JobMiddleware
 var wasInitialized bool
 
+/// TODO @droman: all of that is trash code, make an interface or something but keep it decoupled
+
 func Initializer() func(pass func(cb func(db *sql.DB) error) error) error {
 	return global.Initialize
 }
