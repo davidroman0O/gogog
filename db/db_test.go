@@ -51,13 +51,14 @@ type MyData struct {
 func TestCreateTableMemory(t *testing.T) {
 
 	if err := Initialize(
-		WithDBConfig(DBWithMode(Memory))); err != nil {
+		WithDBConfig(
+			DBWithMode(Memory))); err != nil {
 		t.Error(err)
 	}
 
 	// Let's test a basic table with a few columns
 	if err := Do(func(db *sql.DB) error {
-		db.Exec(`
+		_, err := db.Exec(`
 CREATE TABLE IF NOT EXISTS mytable (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	natural TEXT NOT NULL,
@@ -67,14 +68,14 @@ CREATE TABLE IF NOT EXISTS mytable (
 	data JSON
 );
 		`)
-		return nil
+		return err
 	}); err != nil {
 		t.Error(err)
 	}
 
 	if err := Do(func(db *sql.DB) error {
-		db.Exec("INSERT INTO mytable (natural, data) VALUES (?, ?)", "Example 1", `{"key": "value", "numbers": [1, 2, 3]}`)
-		return nil
+		_, err := db.Exec("INSERT INTO mytable (natural, data) VALUES (?, ?)", "Example 1", `{"key": "value", "numbers": [1, 2, 3]}`)
+		return err
 	}); err != nil {
 		t.Error(err)
 	}
@@ -94,11 +95,11 @@ CREATE TABLE IF NOT EXISTS mytable (
 	}
 
 	if err := Do(func(db *sql.DB) error {
-		db.Exec(`
+		_, err := db.Exec(`
         INSERT INTO mytable (natural, data, created_at)
         VALUES (?, ?, ?)
     `, myData.Natural, dataJSON, myData.CreatedAt)
-		return nil
+		return err
 	}); err != nil {
 		t.Error(err)
 	}
@@ -136,9 +137,13 @@ CREATE TABLE IF NOT EXISTS mytable (
 		t.Error(err)
 	}
 
+	// pp.Println(results)
+
 	if len(results) == 0 {
 		t.Error("no results")
 	}
+
+	slog.Info("closing")
 
 	if err := Close(); err != nil {
 		t.Error(err)

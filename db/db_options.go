@@ -7,6 +7,7 @@ import (
 
 // Configuration for the database connection
 type dbConfig struct {
+	name     string
 	mode     Option[dbMode]
 	file     Option[dbFile]
 	mutex    Option[dbMutex]
@@ -19,6 +20,12 @@ type dbOption func(*dbConfig)
 func DBWithMode(value dbMode) dbOption {
 	return func(config *dbConfig) {
 		config.mode.Enable(value)
+	}
+}
+
+func DBWithName(value string) dbOption {
+	return func(config *dbConfig) {
+		config.name = value
 	}
 }
 
@@ -46,6 +53,7 @@ func DBWithFullMutex() dbOption {
 func NewSettingConfig(options ...dbOption) *dbConfig {
 	// with defaults
 	config := &dbConfig{
+		name: "sqlite3-extended",
 		mode: Option[dbMode]{
 			Env:     "DB_MODE",
 			Enabled: true,
@@ -54,7 +62,7 @@ func NewSettingConfig(options ...dbOption) *dbConfig {
 		file: Option[dbFile]{
 			Env:     "DB_FILE",
 			Enabled: true,
-			Value:   dbFile(fmt.Sprintf("%v/%v.db", "./", "gogog")),
+			Value:   dbFile(fmt.Sprintf("%v/%v.db", ".", "gogog")),
 		},
 		mutex: Option[dbMutex]{
 			Env:     "DB_MUTEX",
@@ -80,6 +88,9 @@ func ConnectionString(config *dbConfig) (string, error) {
 		}
 	}
 
+	if config.mode.Value == Memory {
+		return ":memory:", nil
+	}
 	// file:XXX?mode=YYY&{key}={value}&
 	return fmt.Sprintf("%v?%v&%v", config.file.String(), config.mode.String(), queueStr), nil
 }
