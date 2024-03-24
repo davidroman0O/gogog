@@ -113,6 +113,8 @@ func Initialize(opts ...initOpts) error {
 		return err
 	}
 
+	db.SetMaxOpenConns(1)
+
 	if err = db.Ping(); err != nil {
 		return err
 	}

@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/k0kubun/pp/v3"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -116,19 +115,19 @@ func (t *JobMiddleware) Create(w work) error {
 		return err
 	}
 
-	fmt.Println("prepare insert into db")
+	// fmt.Println("prepare insert into db")
 
 	var dataJson []byte
 	if dataJson, err = json.Marshal(valueOfWork); err != nil {
 		return err
 	}
 
-	fmt.Println("exec insert into db")
+	// fmt.Println("exec insert into db")
 	if _, err = tx.Exec("INSERT INTO jobs (status, type, payload, created_at) VALUES (?, ?, ?, datetime('now'))", Enequeued, nameType, string(dataJson)); err != nil {
 		return err
 	}
 
-	fmt.Println("insert db log", t.db)
+	// fmt.Println("insert db log", t.db)
 
 	return tx.Commit()
 }
@@ -209,10 +208,10 @@ func (t *JobMiddleware) OnClose(db *sql.DB) error {
 }
 
 func (t *JobMiddleware) OnInsert(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error {
-	log.Printf("Jobs Insert operation on table %s with rowid %d", table, rowid)
+	// log.Printf("Jobs Insert operation on table %s with rowid %d", table, rowid)
 	var err error
 
-	fmt.Println("lock before beginx tx hook")
+	// fmt.Println("lock before beginx tx hook")
 
 	rows, err := conn.Query(`SELECT id, type, payload, status, strftime('%Y-%m-%d %H:%M:%S', created_at) FROM jobs WHERE id = ?`, []driver.Value{rowid})
 	if err != nil {
@@ -236,7 +235,7 @@ func (t *JobMiddleware) OnInsert(conn *sqlite3.SQLiteConn, db string, table stri
 		status, _ := dest[3].(string)
 		created_at, _ := dest[4].(string)
 
-		fmt.Println(id, typeJob, payload, status, dest[4])
+		// fmt.Println(id, typeJob, payload, status, dest[4])
 		createdAt, err := time.Parse("2006-01-02 15:04:05", created_at)
 		if err != nil {
 			return err // Handle parsing error
@@ -260,7 +259,7 @@ func (t *JobMiddleware) OnInsert(conn *sqlite3.SQLiteConn, db string, table stri
 				return err
 			}
 
-			pp.Println(paramInstancePtr)
+			// pp.Println(paramInstancePtr)
 
 			row.Payload = paramInstancePtr
 
@@ -269,7 +268,7 @@ func (t *JobMiddleware) OnInsert(conn *sqlite3.SQLiteConn, db string, table stri
 
 	}
 
-	pp.Println(results)
+	// pp.Println(results)
 
 	for key, rows := range results {
 		if t.tasks[key] == nil {
@@ -281,7 +280,7 @@ func (t *JobMiddleware) OnInsert(conn *sqlite3.SQLiteConn, db string, table stri
 
 				// Convert paramInstancePtr (which is an interface{}) back to reflect.Value
 				// Note: If your function expects a value instead of a pointer, you might need to adjust this
-				pp.Println(v.Payload)
+				// pp.Println(v.Payload)
 				paramValue := reflect.ValueOf(v.Payload)
 
 				results := receiver.fn.Call([]reflect.Value{
