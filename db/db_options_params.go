@@ -15,7 +15,7 @@ type Option[T Exposable] struct {
 	Value   Exposable
 }
 
-func (o Option[T]) Enable(value T) {
+func (o *Option[T]) Enable(value T) {
 	o.Enabled = true
 	o.Value = value
 }
@@ -81,11 +81,11 @@ type dbCache bool
 
 func (v dbCache) String(env string) string {
 	if env != "" {
-		return fmt.Sprintf("_cache:%v", env)
+		return fmt.Sprintf("cache:%v", env)
 	}
-	value := "private"
+	value := "shared"
 	if !v {
-		value = "shared"
+		value = "private"
 	}
-	return fmt.Sprintf("_mutex:%v", value)
+	return fmt.Sprintf("cache:%v", value)
 }

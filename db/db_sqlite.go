@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
+	"log/slog"
 	"os"
 	"reflect"
 
@@ -19,8 +21,8 @@ func Do(cb DoFn) error {
 }
 
 type initConfig struct {
-	db          *dbConfig
-	middlewares map[reflect.Type]Middleware
+	db                *dbConfig
+	middlewareManager *MiddlewareManager
 }
 
 type initOpts func(*initConfig) error
@@ -32,76 +34,29 @@ func WithDBConfig(opts ...dbOption) initOpts {
 	}
 }
 
-type Middleware struct {
-	Initializer func(pass func(cb func(db *sql.DB) error) error) error
-	Closer      func() error
-	OnInsert    func(db string, table string, rowid int64) error
-	OnUpdate    func(db string, table string, rowid int64) error
-	OnDelete    func(db string, table string, rowid int64) error
-}
-
-type middlewareOptions func(*Middleware) error
-
-func WithInitializer[T any](Initializer func(pass func(cb func(db *sql.DB) error) error) error) middlewareOptions {
-	return func(middleware *Middleware) error {
-		middleware.Initializer = Initializer
-		return nil
-	}
-}
-
-func WithCloser[T any](closer func() error) middlewareOptions {
-	return func(middleware *Middleware) error {
-		middleware.Closer = closer
-		return nil
-	}
-}
-func WithOnInsert[T any](hook func(db string, table string, rowid int64) error) middlewareOptions {
-	return func(middleware *Middleware) error {
-		middleware.OnInsert = hook
-		return nil
-	}
-}
-
-func WithOnUpdate[T any](hook func(db string, table string, rowid int64) error) middlewareOptions {
-	return func(middleware *Middleware) error {
-		middleware.OnUpdate = hook
-		return nil
-	}
-}
-
-func WithOnDelete[T any](hook func(db string, table string, rowid int64) error) middlewareOptions {
-	return func(middleware *Middleware) error {
-		middleware.OnDelete = hook
-		return nil
-	}
-}
-
-func WithMiddleware[T any](opts ...middlewareOptions) initOpts {
+func WithDBMemory() initOpts {
 	return func(config *initConfig) error {
-		middleware := &Middleware{}
-		for _, v := range opts {
-			if err := v(middleware); err != nil {
-				return err
-			}
-		}
-		config.middlewares[reflect.TypeFor[T]()] = *middleware
+		config.db = NewSettingConfig(
+			DBWithMode(Memory),
+		)
 		return nil
 	}
 }
 
-// func Find[T Middleware]() (*T, bool) {
-// 	for _, middleware := range config.middlewares {
-// 		if m, ok := (middleware).(T); ok {
-// 			return &m, true
-// 		}
-// 	}
-// 	return nil, false
-// }
+func WithMiddleware(middleware Middleware) initOpts {
+	return func(ic *initConfig) error {
+		if reflect.TypeOf(middleware).Kind() != reflect.Ptr {
+			return fmt.Errorf("middleware must be a pointer to a struct")
+		}
+		ic.middlewareManager.Register(middleware)
+		return nil
+	}
+}
 
 func Initialize(opts ...initOpts) error {
 	if config == nil {
 		config = &initConfig{
-			middlewares: map[reflect.Type]Middleware{},
+			middlewareManager: &MiddlewareManager{},
 		}
 		for _, opt := range opts {
 			if err := opt(config); err != nil {
@@ -117,6 +72,8 @@ func Initialize(opts ...initOpts) error {
 		return err
 	}
 
+	slog.Info("connection string ", slog.String("value", connectionString))
+
 	sql.Register(
 		config.db.name,
 		&sqlite3.SQLiteDriver{
@@ -128,24 +85,21 @@ func Initialize(opts ...initOpts) error {
 						switch op {
 
 						case sqlite3.SQLITE_INSERT:
-							for _, middleware := range config.middlewares {
-								if middleware.OnInsert != nil {
-									middleware.OnInsert(db, table, rowid) // TODO @droman: how the fuck i will managed that?
-								}
+							if err := config.middlewareManager.RunOnInsert(conn, db, table, rowid); err != nil {
+								// TODO: Handle error - i have no idea how
+								slog.Error("SQLITE_INSERT error: %v", err)
 							}
 
 						case sqlite3.SQLITE_UPDATE:
-							for _, middleware := range config.middlewares {
-								if middleware.OnUpdate != nil {
-									middleware.OnUpdate(db, table, rowid) // TODO @droman: how the fuck i will managed that?
-								}
+							if err := config.middlewareManager.RunOnUpdate(conn, db, table, rowid); err != nil {
+								// TODO: Handle error - i have no idea how
+								slog.Error("SQLITE_UPDATE error: %v", err)
 							}
 
 						case sqlite3.SQLITE_DELETE:
-							for _, middleware := range config.middlewares {
-								if middleware.OnDelete != nil {
-									middleware.OnDelete(db, table, rowid) // TODO @droman: how the fuck i will managed that?
-								}
+							if err := config.middlewareManager.RunOnDelete(conn, db, table, rowid); err != nil {
+								// TODO: Handle error - i have no idea how
+								slog.Error("SQLITE_DELETE error: %v", err)
 							}
 
 						}
@@ -163,10 +117,9 @@ func Initialize(opts ...initOpts) error {
 		return err
 	}
 
-	for _, middleware := range config.middlewares {
-		if err := middleware.Initializer(func(cb func(db *sql.DB) error) error { return cb(db) }); err != nil {
-			return err
-		}
+	// Initialize middlewares
+	if err := config.middlewareManager.RunOnInit(db); err != nil {
+		return err
 	}
 
 	return nil
@@ -174,11 +127,12 @@ func Initialize(opts ...initOpts) error {
 
 func Close() error {
 	if db != nil {
-		for _, middleware := range config.middlewares {
-			if err := middleware.Closer(); err != nil {
-				return err
-			}
+
+		// Close middlewares
+		if err := config.middlewareManager.RunOnClose(db); err != nil {
+			return err
 		}
+
 		// Check if the file exists
 		if _, err := os.Stat(config.db.filePath); err == nil {
 			// Remove the file
@@ -187,6 +141,68 @@ func Close() error {
 			}
 		}
 		db.Close()
+	}
+
+	return nil
+}
+
+type Middleware interface {
+	OnInit(db *sql.DB) error
+	OnClose(db *sql.DB) error
+	OnInsert(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error
+	OnUpdate(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error
+	OnDelete(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error
+}
+
+type MiddlewareManager struct {
+	middlewares []Middleware
+}
+
+func (mm *MiddlewareManager) Register(middleware Middleware) {
+	mm.middlewares = append(mm.middlewares, middleware)
+}
+
+func (mm *MiddlewareManager) RunOnInit(db *sql.DB) error {
+	for _, middleware := range mm.middlewares {
+		if err := middleware.OnInit(db); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mm *MiddlewareManager) RunOnClose(db *sql.DB) error {
+	for _, middleware := range mm.middlewares {
+		if err := middleware.OnClose(db); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mm *MiddlewareManager) RunOnInsert(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error {
+	for _, middleware := range mm.middlewares {
+		if err := middleware.OnInsert(conn, db, table, rowid); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mm *MiddlewareManager) RunOnUpdate(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error {
+	for _, middleware := range mm.middlewares {
+		if err := middleware.OnUpdate(conn, db, table, rowid); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mm *MiddlewareManager) RunOnDelete(conn *sqlite3.SQLiteConn, db string, table string, rowid int64) error {
+	for _, middleware := range mm.middlewares {
+		if err := middleware.OnDelete(conn, db, table, rowid); err != nil {
+			return err
+		}
 	}
 	return nil
 }

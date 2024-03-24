@@ -11,6 +11,7 @@ type dbConfig struct {
 	mode     Option[dbMode]
 	file     Option[dbFile]
 	mutex    Option[dbMutex]
+	cache    Option[dbCache]
 	filePath string
 }
 
@@ -49,6 +50,18 @@ func DBWithFullMutex() dbOption {
 	}
 }
 
+func DBWithCacheShared() dbOption {
+	return func(config *dbConfig) {
+		config.cache.Enable(true)
+	}
+}
+
+func DBWithCachePrivate() dbOption {
+	return func(config *dbConfig) {
+		config.cache.Enable(false)
+	}
+}
+
 // Supposed easy configuration through dependency injection
 func NewSettingConfig(options ...dbOption) *dbConfig {
 	// with defaults
@@ -61,11 +74,15 @@ func NewSettingConfig(options ...dbOption) *dbConfig {
 		},
 		file: Option[dbFile]{
 			Env:     "DB_FILE",
-			Enabled: true,
+			Enabled: false,
 			Value:   dbFile(fmt.Sprintf("%v/%v.db", ".", "gogog")),
 		},
 		mutex: Option[dbMutex]{
 			Env:     "DB_MUTEX",
+			Enabled: false,
+		},
+		cache: Option[dbCache]{
+			Env:     "DB_CACHE",
 			Enabled: false,
 		},
 		filePath: fmt.Sprintf("%v/%v.db", "./", "gogog"),
@@ -77,22 +94,36 @@ func NewSettingConfig(options ...dbOption) *dbConfig {
 }
 
 func ConnectionString(config *dbConfig) (string, error) {
-	params := []string{
-		config.mutex.String(),
+
+	options := []string{}
+
+	if config.cache.Enabled {
+		fmt.Println("added ", config.cache.String())
+		options = append(options, config.cache.String())
+	}
+	if config.file.Enabled {
+		fmt.Println("added ", config.file.String())
+		options = append(options, config.file.String())
+	}
+	if config.mode.Enabled {
+		fmt.Println("added ", config.mode.String())
+		options = append(options, config.mode.String())
 	}
 
 	queueStr := ""
-	for _, v := range params {
+	for _, v := range options {
 		if v != "" {
 			queueStr += v + "&"
 		}
 	}
 
 	if config.mode.Value == Memory {
-		return ":memory:", nil
+		// :memory:?mode=YYY
+		return fmt.Sprintf(":memory:?%v", queueStr), nil
 	}
+
 	// file:XXX?mode=YYY&{key}={value}&
-	return fmt.Sprintf("%v?%v&%v", config.file.String(), config.mode.String(), queueStr), nil
+	return fmt.Sprintf("%v?%v", config.file.String(), queueStr), nil
 }
 
 func getEnvDefault(key, defaultValue string) string {

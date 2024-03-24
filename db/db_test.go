@@ -6,9 +6,12 @@ import (
 	"log/slog"
 	"testing"
 	"time"
+
+	logger "github.com/davidroman0O/gogog/db/middlewares"
 )
 
 /// TODO @droman: test all options
+/// TODO @droman: i need to find to  completely remove the sqlite3 context between tests to avoid the "double registry" issue
 
 func TestOpenCloseMemory(t *testing.T) {
 
@@ -50,7 +53,10 @@ type MyData struct {
 
 func TestCreateTableMemory(t *testing.T) {
 
+	logger := &logger.LoggerMiddleware{}
+
 	if err := Initialize(
+		WithMiddleware(logger),
 		WithDBConfig(
 			DBWithMode(Memory))); err != nil {
 		t.Error(err)
