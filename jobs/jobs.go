@@ -16,6 +16,7 @@ import (
 
 /// https://sqldocs.org/sqlite/golang-sqlite/
 /// TODO @droman: I will do a simple job system that leverage the sqlite
+/// The basics are working, i have to deal with database locks and concurrency. For now it's really dirty and i will have to make some cleaning but it's working!
 
 var global *JobMiddleware
 var wasInitialized bool
@@ -140,6 +141,8 @@ func (t *JobMiddleware) Add(typeFor string, task task) error {
 	if taskType.NumIn() != 1 || taskType.NumOut() != 1 || taskType.Out(0) != reflect.TypeOf((*error)(nil)).Elem() {
 		return fmt.Errorf("task function must have one parameter of type 'data' and return 'error'")
 	}
+
+	// that's a whole old trick i used in my go-experiments to abstract the functions and their parameters so i can have a lit api
 	fn := reflect.ValueOf(task)
 	// if fn.Type().NumIn() == 1 {
 	// 	// Get the type of the first parameter
