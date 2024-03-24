@@ -18,6 +18,69 @@ import (
 /// TODO @droman: I will do a simple job system that leverage the sqlite
 /// The basics are working, i have to deal with database locks and concurrency. For now it's really dirty and i will have to make some cleaning but it's working!
 
+type Worker struct {
+	db        *sql.DB
+	consumers map[string][]ConsumerReflect
+}
+
+type ConsumerReflect struct {
+	// function contains as a value for easier control of call it
+	fn reflect.Value
+	//	type of the data of the consumer, require to parse the payload and pass it to the consumer
+	in reflect.Type
+}
+
+type Consumer[T any] func(ctx context.Context, data T) error
+
+func WorkerWithConsumer[T any](fn Consumer[T]) WorkerOption {
+	return func(w *Worker) error {
+		consumerType := reflect.TypeOf(fn)     // extract the function as a reflect.Type
+		typeFor := reflect.TypeFor[T]().Name() // extract the name of the type
+
+		// trivial validation
+		if consumerType.Kind() != reflect.Func {
+			return fmt.Errorf("task must be a function")
+		}
+
+		if consumerType.NumIn() != 2 || consumerType.NumOut() != 1 || consumerType.Out(0) != reflect.TypeOf((*error)(nil)).Elem() {
+			return fmt.Errorf("task function must have two parameters (ctx and data) and return 'error'")
+		}
+
+		// we have to get extract the function as a reflect.Value to be able to call it
+		fn := reflect.ValueOf(fn)
+
+		// if the map is not initialized, we initialize it
+		if _, ok := w.consumers[typeFor]; !ok {
+			w.consumers[typeFor] = []ConsumerReflect{}
+		}
+
+		//	we append the consumer to the list of consumers while keeping the type of the data
+		w.consumers[typeFor] = append(w.consumers[typeFor], ConsumerReflect{fn: reflect.ValueOf(fn), in: fn.Type().In(1)})
+
+		return nil
+	}
+}
+
+type WorkerOption func(*Worker) error
+
+func newWorker(opts ...WorkerOption) *Worker {
+	w := &Worker{
+		consumers: map[string][]ConsumerReflect{},
+	}
+	for _, opt := range opts {
+		opt(w)
+	}
+	return w
+}
+
+type MiddlewareWorker struct {
+	db *sql.DB
+}
+
+func NewMiddlewareWorker() *MiddlewareWorker {
+	return &MiddlewareWorker{}
+}
+
 var global *JobMiddleware
 var wasInitialized bool
 
@@ -59,7 +122,7 @@ var (
 // Only the runtime knows how to handle a job type with a callback.
 // A job is a stored item that represent a future Task (runtime)
 type job[T any] struct {
-	ID        int64
+	ID        int64        `json:"id"`
 	State     State        `json:"status"`
 	Type      string       `json:"type"`
 	Payload   T            `json:"payload"`

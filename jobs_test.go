@@ -31,6 +31,7 @@ func TestJobTest(t *testing.T) {
 	if err := db.Initialize(
 		db.WithDBConfig(db.DBWithMode(db.Memory), db.DBWithCacheShared()),
 		db.WithMiddleware(middleware),
+		// db.WithMiddleware(&logger.LoggerMiddleware{}),
 	); err != nil {
 		t.Error(err)
 	}
