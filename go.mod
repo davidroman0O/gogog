@@ -3,7 +3,9 @@ module github.com/davidroman0O/gogog
 go 1.22
 
 require (
+	github.com/Jeffail/tunny v0.1.4
 	github.com/a-h/templ v0.2.543
+	github.com/asdine/storm/v3 v3.2.1
 	github.com/charmbracelet/bubbles v0.17.1
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
@@ -11,17 +13,16 @@ require (
 	github.com/chromedp/chromedp v0.9.3
 	github.com/gofiber/fiber/v2 v2.52.0
 	github.com/k0kubun/pp/v3 v3.2.0
+	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/rakyll/statik v0.1.7
 	github.com/spf13/cobra v1.8.0
 )
 
 require (
-	github.com/Jeffail/tunny v0.1.4 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/asdine/storm/v3 v3.2.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
-	github.com/gchaincl/sqlhooks v1.3.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.3.2 // indirect
@@ -35,7 +36,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
