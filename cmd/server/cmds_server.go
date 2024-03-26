@@ -216,6 +216,27 @@ func Cmd() *cobra.Command {
 				}
 			})
 
+			mux.HandleFunc("GET /api/v1/games", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
+				w.Header().Set("Pragma", "no-cache")
+				w.Header().Set("Expires", "0")
+				games, err := data.GetGames()
+				if err != nil {
+					w.WriteHeader(400)
+					w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+					w.Write([]byte("bad request"))
+				}
+				w.Header().Add("Content-Type", "application/json")
+				bytes, err := json.Marshal(games)
+				if err != nil {
+					w.WriteHeader(400)
+					w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+					w.Write([]byte("bad request"))
+				}
+				w.Write(bytes)
+			})
+
 			mux.HandleFunc("GET /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(200)
 				w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")

@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-//go:embed main.js index.html
+//go:embed main.js index.html style.css
 var staticFiles embed.FS
 
 func main() {
