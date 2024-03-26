@@ -106,7 +106,7 @@ func Cmd() *cobra.Command {
 			defer poolGameCache.Close()
 
 			server := &http.Server{
-				Addr:         ":8080",
+				Addr:         ":8000",
 				ReadTimeout:  10 * time.Second,
 				WriteTimeout: 10 * time.Second,
 			}
